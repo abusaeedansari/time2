@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Telling Time Quiz</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: "Open Sans", sans-serif;
+    background: linear-gradient(to bottom right, #aed3f2, #dceeff);
+    margin: 0; padding: 0; color: #333;
+  }
+  header {
+    background: #0071bc;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  header h1 {
+    margin: 0; font-size: 2.2em; font-family: "Space Mono", monospace; letter-spacing: 1px;
+  }
+  .container {
+    max-width: 700px; margin: 20px auto; background: #fff; border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 20px; margin-bottom: 40px;
+  }
+  .intro, .quiz-area, .result-area { display: none; }
+  .active { display: block; }
+  .intro p { font-size: 1.2em; }
+  .name-input { margin: 20px 0; }
+  input[type="text"] {
+    padding: 10px; width: 100%; box-sizing: border-box;
+    margin-bottom: 15px; border: 1px solid #aaa; border-radius: 5px; font-size: 1.1em;
+  }
+  .button {
+    background: #0071bc; color: #fff; padding: 12px 24px; border: none; border-radius:5px;
+    cursor: pointer; font-size: 1.1em; margin: 5px 0; display: inline-block; font-family:"Space Mono", monospace;
+    transition: background 0.3s ease;
+  }
+  .button:hover { background: #005c94; }
+  .top-info {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom:20px;
+  }
+  .timer, .scoreboard {
+    font-size: 1.1em; font-weight: bold; color: #0071bc; font-family:"Space Mono", monospace;
+  }
+  .question-count {
+    font-weight: bold; margin-bottom: 10px; font-size: 1.2em; text-align:center; font-family:"Space Mono", monospace;
+  }
+  .question-text {
+    margin-bottom: 20px; font-size: 1.3em; text-align:center; font-weight:bold; font-family:"Space Mono", monospace;
+    color:#333;
+  }
+  .answers { margin-bottom: 20px; }
+  .answers label {
+    display: block; margin-bottom:10px; font-size:1.1em; cursor: pointer; 
+    background: #f8f8f8; padding:10px; border-radius:5px; transition:background 0.3s ease;
+  }
+  .answers label:hover { background:#e6f2fa; }
+  .answers input[type=radio] { margin-right:8px; }
+  .feedback {
+    font-size:1.1em; margin-bottom:20px; padding:10px; border-radius:5px; text-align:center; font-weight:bold;
+  }
+  .feedback.correct {
+    background:#d5f8d0; border:1px solid #9ed98b; color:#333;
+  }
+  .feedback.incorrect {
+    background:#fcdcdc; border:1px solid #e5a5a5; color:#333;
+  }
+  .explanation {
+    font-size:1.1em; margin-bottom:20px; text-align:center; font-style: italic; color:#555;
+  }
+  .hidden { display:none; }
+  .result-area h2 {
+    font-size:1.8em; text-align:center; font-family:"Space Mono", monospace;
+  }
+  .result-area p {
+    font-size:1.2em; text-align:center;
+  }
+  footer {
+    text-align:center; color:#030303; margin:20px 0; font-size:1em; font-family:"Open Sans", sans-serif;
+  }
+  .clock-wrapper {
+    width:200px; height:200px; margin:20px auto; position:relative;
+  }
+  @media (max-width: 600px) {
+    .container { margin:10px; padding:15px; }
+    header h1 { font-size:1.8em; }
+    .intro p, .question-text, .answers label { font-size:1.1em; }
+    .timer, .scoreboard { font-size:1.1em; }
+    .button { font-size:1em; padding:10px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Telling Time Quiz</h1>
+</header>
+
+<div class="container">
+  <div class="intro active" id="intro">
+    <h2 style="font-family:'Space Mono', monospace;">Welcome!</h2>
+    <p>This quiz will test your understanding of telling time on an analog clock, including o'clock, half past, quarter past, and quarter to. You have 50 questions and 15 minutes total.</p>
+    <p>Enter your name to begin. Good luck!</p>
+    <div class="name-input">
+      <input type="text" id="playerName" placeholder="Your Name" />
+    </div>
+    <button class="button" onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div class="quiz-area" id="quiz-area">
+    <div class="top-info">
+      <div class="timer" id="timer">Time: 15:00</div>
+      <div class="scoreboard" id="scoreboard">Score: 0</div>
+    </div>
+    <div class="question-count" id="question-count"></div>
+    <div id="clock-area"></div>
+    <div class="question-text" id="question-text"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="explanation hidden" id="explanation"></div>
+    <button class="button" id="submitBtn" onclick="submitAnswer()">Check Answer</button>
+    <button class="button hidden" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+  </div>
+
+  <div class="result-area" id="result-area">
+    <h2>Quiz Completed!</h2>
+    <p id="final-message"></p>
+    <p id="final-score"></p>
+    <p>Thank you for playing! Keep practicing and have fun learning!</p>
+  </div>
+</div>
+
+<footer>
+  <p>All the best!</p>
+</footer>
+
+<script>
+const timeTypes = [
+  {label:"o'clock", minutes:0},
+  {label:"quarter past", minutes:15},
+  {label:"half past", minutes:30},
+  {label:"quarter to", minutes:45}
+];
+
+function timeToWords(h, m) {
+  let type = timeTypes.find(t=>t.minutes===m);
+  if(!type) return "";
+  if(type.label==="quarter to") {
+    let hh = (h%12)+1; 
+    return "quarter to "+hh;
+  } 
+  if(type.label==="o'clock") return h+" o'clock";
+  if(type.label==="quarter past") return "quarter past "+h;
+  if(type.label==="half past") return "half past "+h;
+  return "";
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function generateQuestion() {
+  let hour = Math.floor(Math.random()*12)+1; 
+  let t = timeTypes[Math.floor(Math.random()*timeTypes.length)];
+  let correctAnswer = timeToWords(hour, t.minutes);
+
+  // Generate distractors more strategically
+  let distractors = [];
+
+  // 1) A distractor with the same phrase but hour+1 or hour-1 if possible
+  let samePhraseHourChange = hour===12 ? hour-1 : hour+1;
+  let distractor1 = timeToWords(samePhraseHourChange, t.minutes);
+  if(distractor1 && distractor1!==correctAnswer) distractors.push(distractor1);
+
+  // 2) A distractor with the same hour but different phrase
+  let differentType = timeTypes.filter(tt => tt.minutes!==t.minutes);
+  let chosenDiff = differentType[Math.floor(Math.random()*differentType.length)];
+  let distractor2 = timeToWords(hour, chosenDiff.minutes);
+  if(distractor2 && distractor2!==correctAnswer && !distractors.includes(distractor2)) distractors.push(distractor2);
+
+  // If we still need more distractors, generate random ones
+  while(distractors.length<3) {
+    let randH = Math.floor(Math.random()*12)+1;
+    let randT = timeTypes[Math.floor(Math.random()*timeTypes.length)];
+    let randOpt = timeToWords(randH, randT.minutes);
+    if(randOpt && randOpt!==correctAnswer && !distractors.includes(randOpt)) distractors.push(randOpt);
+  }
+
+  let options = [correctAnswer, ...distractors];
+  shuffleArray(options);
+
+  return {
+    hour: hour,
+    minutes: t.minutes,
+    question: "What time is shown on the clock?",
+    options: options,
+    correct: options.indexOf(correctAnswer),
+    explanation: "The correct time is "+correctAnswer+"."
+  };
+}
+
+// We'll generate all questions first
+let questions = [];
+for(let i=0; i<50; i++){
+  questions.push(generateQuestion());
+}
+
+let totalTime = 15 * 60;
+let timerInterval = null;
+let currentQuestionIndex = 0;
+let score = 0;
+let playerName = "";
+let answeredQuestions = 0;
+
+function startQuiz() {
+  const nameInput = document.getElementById("playerName").value.trim();
+  if(!nameInput) {
+    alert("Please enter your name before starting.");
+    return;
+  }
+  playerName = nameInput;
+  document.getElementById("intro").classList.remove("active");
+  document.getElementById("quiz-area").classList.add("active");
+  showQuestion();
+  startTimer();
+}
+
+function startTimer() {
+  const timerEl = document.getElementById("timer");
+  timerInterval = setInterval(()=>{
+    if(totalTime <= 0) {
+      clearInterval(timerInterval);
+      endQuiz();
+      return;
+    }
+    totalTime--;
+    let minutes = Math.floor(totalTime/60);
+    let seconds = totalTime%60;
+    if(seconds<10) seconds = "0"+seconds;
+    timerEl.textContent = "Time: " + minutes+":"+seconds;
+  },1000);
+}
+
+function showQuestion() {
+  let q = questions[currentQuestionIndex];
+  document.getElementById("question-count").textContent = "Question " + (currentQuestionIndex+1) + " of " + questions.length;
+  document.getElementById("question-text").textContent = q.question;
+  let ansDiv = document.getElementById("answers");
+  ansDiv.innerHTML = "";
+  document.getElementById("feedback").classList.add("hidden");
+  document.getElementById("explanation").classList.add("hidden");
+  document.getElementById("nextBtn").classList.add("hidden");
+  document.getElementById("submitBtn").classList.remove("hidden");
+
+  let clockArea = document.getElementById("clock-area");
+  clockArea.innerHTML = "";
+
+  let clockDiv = document.createElement("div");
+  clockDiv.className = "clock-wrapper";
+
+  let svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("width","200");
+  svg.setAttribute("height","200");
+  svg.style.display="block";
+  svg.style.margin="auto";
+
+  let circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+  circle.setAttribute("cx","100");
+  circle.setAttribute("cy","100");
+  circle.setAttribute("r","98");
+  circle.setAttribute("stroke","black");
+  circle.setAttribute("stroke-width","2");
+  circle.setAttribute("fill","white");
+  svg.appendChild(circle);
+
+  let radius = 70;
+  for(let h=1;h<=12;h++){
+    let angle = (h * 30) - 90; 
+    let rad = angle * Math.PI/180;
+    let x = 100 + radius * Math.cos(rad);
+    let y = 100 + radius * Math.sin(rad) + 5;
+    let txt = document.createElementNS("http://www.w3.org/2000/svg","text");
+    txt.setAttribute("x",x);
+    txt.setAttribute("y",y);
+    txt.setAttribute("font-size","20");
+    txt.setAttribute("font-family","Open Sans");
+    txt.setAttribute("text-anchor","middle");
+    txt.textContent = h.toString();
+    svg.appendChild(txt);
+  }
+
+  let hAngle = ( (q.hour%12)*30 ) + (q.minutes*0.5);
+  let mAngle = q.minutes*6;
+
+  let hRad = (hAngle - 90)*Math.PI/180;
+  let mRad = (mAngle - 90)*Math.PI/180;
+
+  let hx = 100 + 40 * Math.cos(hRad);
+  let hy = 100 + 40 * Math.sin(hRad);
+  let hourHandLine = document.createElementNS("http://www.w3.org/2000/svg","line");
+  hourHandLine.setAttribute("x1","100");
+  hourHandLine.setAttribute("y1","100");
+  hourHandLine.setAttribute("x2",hx);
+  hourHandLine.setAttribute("y2",hy);
+  hourHandLine.setAttribute("stroke","black");
+  hourHandLine.setAttribute("stroke-width","6");
+  hourHandLine.setAttribute("stroke-linecap","round");
+  svg.appendChild(hourHandLine);
+
+  let mx = 100 + 60 * Math.cos(mRad);
+  let my = 100 + 60 * Math.sin(mRad);
+  let minuteHandLine = document.createElementNS("http://www.w3.org/2000/svg","line");
+  minuteHandLine.setAttribute("x1","100");
+  minuteHandLine.setAttribute("y1","100");
+  minuteHandLine.setAttribute("x2",mx);
+  minuteHandLine.setAttribute("y2",my);
+  minuteHandLine.setAttribute("stroke","black");
+  minuteHandLine.setAttribute("stroke-width","4");
+  minuteHandLine.setAttribute("stroke-linecap","round");
+  svg.appendChild(minuteHandLine);
+
+  let centerDot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+  centerDot.setAttribute("cx","100");
+  centerDot.setAttribute("cy","100");
+  centerDot.setAttribute("r","3");
+  centerDot.setAttribute("fill","black");
+  svg.appendChild(centerDot);
+
+  clockDiv.appendChild(svg);
+  clockArea.appendChild(clockDiv);
+
+  q.options.forEach((opt,i)=>{
+    let label = document.createElement("label");
+    let inp = document.createElement("input");
+    inp.type="radio";
+    inp.name="answer";
+    inp.value=i;
+    label.appendChild(inp);
+    label.appendChild(document.createTextNode(" "+opt));
+    ansDiv.appendChild(label);
+  });
+}
+
+function submitAnswer() {
+  let q = questions[currentQuestionIndex];
+  let radios = document.querySelectorAll('input[name="answer"]');
+  let userAns = null;
+  for(let r of radios) {
+    if(r.checked) {
+      userAns = parseInt(r.value);
+      break;
+    }
+  }
+  if(userAns===null) {
+    alert("Please select an answer.");
+    return;
+  }
+
+  let correct = (userAns===q.correct);
+  if(correct) {
+    score +=10;
+  }
+  answeredQuestions++;
+
+  let feedbackEl = document.getElementById("feedback");
+  feedbackEl.classList.remove("hidden");
+  feedbackEl.textContent = correct ? "Correct!" : "Incorrect!";
+  feedbackEl.classList.remove("correct","incorrect");
+  feedbackEl.classList.add(correct ? "correct":"incorrect");
+
+  let explanationEl = document.getElementById("explanation");
+  explanationEl.classList.remove("hidden");
+  explanationEl.textContent = q.explanation;
+
+  document.getElementById("scoreboard").textContent = "Score: " + score;
+
+  document.getElementById("submitBtn").classList.add("hidden");
+  document.getElementById("nextBtn").classList.remove("hidden");
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  if(currentQuestionIndex>=questions.length) {
+    endQuiz();
+  } else {
+    showQuestion();
+  }
+}
+
+function endQuiz() {
+  clearInterval(timerInterval);
+  document.getElementById("quiz-area").classList.remove("active");
+  document.getElementById("result-area").classList.add("active");
+
+  let finalMsg = document.getElementById("final-message");
+  finalMsg.textContent = "Great job, " + playerName + "!";
+
+  let finalScore = document.getElementById("final-score");
+  finalScore.textContent = "Time 2: Your Score: " + score + " out of " + (questions.length*10);
+}
+</script>
+</body>
+</html>
